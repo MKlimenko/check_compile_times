@@ -2,10 +2,15 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <map>
+#include <numeric>
 #include <string>
+#include <vector>
 
 namespace {
-	auto GetElapsedTime(const std::filesystem::path& json_file) {
+	std::map<std::string, std::vector<double>> header_time_map;
+	
+	void GetElapsedTime(const std::filesystem::path& json_file) {
 		auto filename = std::filesystem::path(json_file).filename().string();
 		filename.resize(filename.find("-hpp_main.cpp.json"));
 		std::replace(filename.begin(), filename.end(), '-', '/');
@@ -18,27 +23,42 @@ namespace {
 		str = str.substr(offset + 8);
 		str.resize(str.find('}'));
 		auto elapsed = std::atof(str.c_str());
-		
-		return std::make_pair(filename, elapsed);
+
+		header_time_map[filename].push_back(elapsed);
 	}
 }
 
 int main(int argc, char** argv) {
-	auto cmake_files_path = std::filesystem::absolute(std::filesystem::path(argv[0]).root_directory() / "CMakeFiles");
+	auto files_path = std::filesystem::absolute(std::filesystem::path(argv[0]).remove_filename());
 
-	for(auto&el:std::filesystem::directory_iterator(cmake_files_path)) {
-		if(!std::filesystem::is_directory(el))
-			continue;
-		if(std::filesystem::path(el).string().find(".dir") == std::string::npos)
+
+	for (auto build : std::filesystem::directory_iterator(files_path)) {
+		auto build_path = std::filesystem::path(build) / "CMakeFiles";
+
+		if (!std::filesystem::exists(build_path))
 			continue;
 
-		for (auto& el_file : std::filesystem::directory_iterator(el)) {
-			if(std::filesystem::path(el_file).extension().string() == ".json") {
-				const auto name_time = GetElapsedTime(el_file);
-				std::cout << name_time.first << "\t" << name_time.second << std::endl;
+		for (auto& el : std::filesystem::directory_iterator(build_path)) {
+			if (!std::filesystem::is_directory(el))
+				continue;
+
+
+			if (std::filesystem::path(el).string().find(".dir") == std::string::npos)
+				continue;
+
+			for (auto& el_file : std::filesystem::directory_iterator(el)) {
+				if (std::filesystem::path(el_file).extension().string() == ".json") {
+					GetElapsedTime(el_file);
+				}
 			}
 		}
 	}
-	
+
+	for (auto& el : header_time_map) {
+		auto time = std::accumulate(el.second.begin(), el.second.end(), 0.0);
+		time /= el.second.size();
+		std::cout << el.first << "\t" << time << std::endl;
+	}
+
 	return 0;
 }
