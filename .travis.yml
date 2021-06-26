@@ -7,6 +7,11 @@ compiler:
 before_install:
   - sudo apt-get update
   - sudo apt-get -y install libboost-all-dev
+  - sudo apt-get -y install ninja-build
 
 script:
-  - ./run.sh
+  - mkdir build
+  - cd build
+  - cmake -G Ninja ..
+  - cmake --build .
+
