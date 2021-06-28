@@ -55,31 +55,31 @@ int main(int argc, char** argv) {
 		}
 		
 		auto markdown_table = std::ofstream("check_compile_times.wiki/Home.md");
+		
+		markdown_table << "# Boost headers signal compilation impact" << std::endl;
 
-		std::cout << "# Boost headers signal compilation impact" << std::endl;
-
-		std::cout << "| Header 	| Time, ms 	|" << std::endl;
-		std::cout << "|-	|-	|" << std::endl;
+		markdown_table << "| Header 	| Time, ms 	|" << std::endl;
+		markdown_table << "|-	|-	|" << std::endl;
 		
 		std::vector<std::pair<std::string, double>> sorted_times;
 		for (auto& el : header_time_map) {
 			auto time = std::accumulate(el.second.begin(), el.second.end(), 0.0);
 			time /= el.second.size();
 			sorted_times.emplace_back(el.first, time);
-			std::cout << "|" << el.first << "\t|" << time << "\t|" << std::endl;
+			markdown_table << "|" << el.first << "\t|" << time << "\t|" << std::endl;
 		}
 		
-		std::cout << std::endl << std::endl << std::endl;
+		markdown_table << std::endl << std::endl << std::endl;
 		std::partial_sort(sorted_times.begin(), sorted_times.begin() + 5, sorted_times.end(), [](auto&lhs, auto&rhs) {
 			return lhs.second > rhs.second;
 		});
 		sorted_times.resize(5);
 		
-		std::cout << "# Top-5 boost headers signal compilation impact" << std::endl;
-		std::cout << "| Header 	| Time, ms 	|" << std::endl;
-		std::cout << "|-	|-	|" << std::endl;
+		markdown_table << "# Top-5 boost headers signal compilation impact" << std::endl;
+		markdown_table << "| Header 	| Time, ms 	|" << std::endl;
+		markdown_table << "|-	|-	|" << std::endl;
 		for (auto& el : sorted_times) {
-			std::cout << "|" << el.first << "\t|" << el.second << "\t|" << std::endl;
+			markdown_table << "|" << el.first << "\t|" << el.second << "\t|" << std::endl;
 		}
 		
 		

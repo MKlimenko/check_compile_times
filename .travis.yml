@@ -2,39 +2,46 @@ language: cpp
 os: linux
 dist: focal
 compiler:
-  - clang
-
+- clang
 addons:
   apt:
     packages:
-      - clang-10
-      - libc++-10-dev
-      - libc++abi-10-dev
-      - libboost-all-dev
-      - ninja-build
-    
+    - clang-10
+    - libc++-10-dev
+    - libc++abi-10-dev
+    - libboost-all-dev
+    - ninja-build
 before_install:
-  - eval "CC=clang-10 && CXX=clang-10"
-
+- eval "CC=clang-10 && CXX=clang-10"
 script:
-  - mkdir build
-  - cd build
-  - |
-      for i in {0..1}
-      do
-          mkdir build_$i;
-          cd build_$i;
-          cmake -G Ninja ../..;
-          cmake --build .;
-          cd ..;
-      done
-  - cmake -G Ninja .. -DSKIP_EVALUATION=true
-  - cmake --build .
-  - git clone https://github.com/MKlimenko/check_compile_times.wiki.git
-  - ./CheckCompileTimes
-#  - cd check_compile_times.wiki
-#  - git add Home.md
-#  - git commit -m "Update table"
-#  - git remote remove origin
-#  - git remote add origin https://$GITHUB_API_KEY@github.com/MKlimenko/check_compile_times.wiki.git > /dev/null 2>&1
-#  - git push -u origin
+- mkdir build
+- cd build
+- |
+    for i in {0..1}
+    do
+        mkdir build_$i;
+        cd build_$i;
+        cmake -G Ninja ../..;
+        cmake --build .;
+        cd ..;
+    done
+- cmake -G Ninja .. -DSKIP_EVALUATION=true
+- cmake --build .
+- git clone https://github.com/MKlimenko/check_compile_times.wiki.git
+- "./CheckCompileTimes"
+- cd check_compile_times.wiki
+- git config user.name "Michael Klimenko"
+- git config user.email "mklimenko29@gmail.com"
+- git add Home.md
+- git commit -m "Update table"
+- git remote remove origin
+- git remote add origin https://$GITHUB_API_KEY@github.com/MKlimenko/check_compile_times.wiki.git
+- git remote add upstream https://$GITHUB_API_KEY@github.com/MKlimenko/check_compile_times.wiki.git
+- git fetch origin
+- git fetch upstream
+- git merge upstream/master --no-edit
+- git push origin HEAD:master
+- git push upstream HEAD:master
+env:
+  matrix:
+    secure: wmfHCm2jtv3AxSRGo3je0EyMy/QLO5oo/bj+JicVctjRdBt5+88khL1lG5HeRtfROtnzVXh5ki0nl5FSo+V2JcAOEdlMIUOd1jup/zNK2zts12Kcc21sT2SAQRqa5KslK0u40p8i5ZvGxK2KKC2uUu7EHlu5a05mD+C67xPaHKLafRPs+fobb4R5BJIZkycI2C/bVeq8S/18BlHicmATSaogDQikwuauGUGAkGd8aJvXy7IsogGC40o5l9A4a/4EvpHWWOEPOebBqmTbHHxz0f9dnL9eYtS147oTHCw5M87QuL9uWZyw4M5SeugbZDR2zihrcSOyPSdIHlkOaWy0gd5WZFhFf9FE9GrxNe4XmMN8wqcy1zADvFWV9ppQLUqATN328Us/neMSP+60YEYajXpyl3sE+fupvQYOTX6lnMspJ2xhzgMJELKsYVilLOzfZY1beqsiH//diXkarZA00QjySI4tFEHvkIlRwtMsgp9A08n89Kd2+jTc7nJx/uPLN3SraLoT8dS+EO99J/PNFCR+idiW5OZ/yGSap2nN05Cy0xtKOvPoeb/SlAEK/WyRh58bDMIf0CywJGZQpDBjxNmXurWPDfkNaBzo5ZStlMwhTsY5aeppNgdFC/3O0Wdg5HW9uB0nnqZXr3xtHo3USaAak485HZ3Ta914rEyUziU=
