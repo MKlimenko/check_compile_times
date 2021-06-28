@@ -10,17 +10,31 @@ addons:
       - clang-10
       - libc++-10-dev
       - libc++abi-10-dev
-  
-  
+      - libboost-all-dev
+      - ninja-build
+    
 before_install:
-  - sudo apt update 
-  - sudo apt -y install libboost-all-dev
-  - sudo apt -y install ninja-build
   - eval "CC=clang-10 && CXX=clang-10"
 
 script:
   - mkdir build
   - cd build
-  - cmake -G Ninja ..
+  - |
+      for i in {0..1}
+      do
+          mkdir build_$i;
+          cd build_$i;
+          cmake -G Ninja ../..;
+          cmake --build .;
+          cd ..;
+      done
+  - cmake -G Ninja .. -DSKIP_EVALUATION=true
   - cmake --build .
+  - git clone https://github.com/MKlimenko/check_compile_times.wiki.git
   - ./CheckCompileTimes
+#  - cd check_compile_times.wiki
+#  - git add Home.md
+#  - git commit -m "Update table"
+#  - git remote remove origin
+#  - git remote add origin https://$GITHUB_API_KEY@github.com/MKlimenko/check_compile_times.wiki.git > /dev/null 2>&1
+#  - git push -u origin

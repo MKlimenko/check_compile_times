@@ -131,17 +131,19 @@ set(HEADERS_TO_PROCESS
 						boost/yap/yap.hpp
 )
 
-foreach(header ${HEADERS_TO_PROCESS})
-	string(REPLACE "." "-" filename_preliminary ${header})
-	string(REPLACE "/" "-" header_name ${filename_preliminary})
-	set(filename "${CMAKE_CURRENT_LIST_DIR}/${header_name}_main.cpp")
-	file(WRITE ${filename} "#include <${header}>\n  int main() { return 0; }\n")
-		
-	set(executable_name "Check${header_name}")
-	add_executable(${executable_name} ${filename})
-	target_compile_options(${executable_name} PUBLIC -ftime-trace)
-	target_link_libraries(${executable_name} pthread stdc++ stdc++fs)
-endforeach()
+if (NOT SKIP_EVALUATION)
+	foreach(header ${HEADERS_TO_PROCESS})
+		string(REPLACE "." "-" filename_preliminary ${header})
+		string(REPLACE "/" "-" header_name ${filename_preliminary})
+		set(filename "${CMAKE_CURRENT_LIST_DIR}/${header_name}_main.cpp")
+		file(WRITE ${filename} "#include <${header}>\n  int main() { return 0; }\n")
+			
+		set(executable_name "Check${header_name}")
+		add_executable(${executable_name} ${filename})
+		target_compile_options(${executable_name} PUBLIC -ftime-trace)
+		target_link_libraries(${executable_name} pthread stdc++ stdc++fs)
+	endforeach()
+endif()
 
 add_executable(CheckCompileTimes main.cpp)
 target_link_libraries(CheckCompileTimes stdc++ stdc++fs)

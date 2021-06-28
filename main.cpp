@@ -29,35 +29,63 @@ namespace {
 }
 
 int main(int argc, char** argv) {
-	auto files_path = std::filesystem::absolute(std::filesystem::path(argv[0]).remove_filename());
+	try {		
+		auto files_path = std::filesystem::absolute(std::filesystem::path(argv[0]).remove_filename());
 
+		for (auto build : std::filesystem::directory_iterator(files_path)) {
+			auto build_path = std::filesystem::path(build) / "CMakeFiles";
 
-	for (auto build : std::filesystem::directory_iterator(files_path)) {
-		auto build_path = std::filesystem::path(build) / "CMakeFiles";
-
-		if (!std::filesystem::exists(build_path))
-			continue;
-
-		for (auto& el : std::filesystem::directory_iterator(build_path)) {
-			if (!std::filesystem::is_directory(el))
+			if (!std::filesystem::exists(build_path))
 				continue;
 
+			for (auto& el : std::filesystem::directory_iterator(build_path)) {
+				if (!std::filesystem::is_directory(el))
+					continue;
 
-			if (std::filesystem::path(el).string().find(".dir") == std::string::npos)
-				continue;
 
-			for (auto& el_file : std::filesystem::directory_iterator(el)) {
-				if (std::filesystem::path(el_file).extension().string() == ".json") {
-					GetElapsedTime(el_file);
+				if (std::filesystem::path(el).string().find(".dir") == std::string::npos)
+					continue;
+
+				for (auto& el_file : std::filesystem::directory_iterator(el)) {
+					if (std::filesystem::path(el_file).extension().string() == ".json") {
+						GetElapsedTime(el_file);
+					}
 				}
 			}
 		}
-	}
+		
+		auto markdown_table = std::ofstream("check_compile_times.wiki/Home.md");
 
-	for (auto& el : header_time_map) {
-		auto time = std::accumulate(el.second.begin(), el.second.end(), 0.0);
-		time /= el.second.size();
-		std::cout << el.first << "\t" << time << std::endl;
+		std::cout << "# Boost headers signal compilation impact" << std::endl;
+
+		std::cout << "| Header 	| Time, ms 	|" << std::endl;
+		std::cout << "|-	|-	|" << std::endl;
+		
+		std::vector<std::pair<std::string, double>> sorted_times;
+		for (auto& el : header_time_map) {
+			auto time = std::accumulate(el.second.begin(), el.second.end(), 0.0);
+			time /= el.second.size();
+			sorted_times.emplace_back(el.first, time);
+			std::cout << "|" << el.first << "\t|" << time << "\t|" << std::endl;
+		}
+		
+		std::cout << std::endl << std::endl << std::endl;
+		std::partial_sort(sorted_times.begin(), sorted_times.begin() + 5, sorted_times.end(), [](auto&lhs, auto&rhs) {
+			return lhs.second > rhs.second;
+		});
+		sorted_times.resize(5);
+		
+		std::cout << "# Top-5 boost headers signal compilation impact" << std::endl;
+		std::cout << "| Header 	| Time, ms 	|" << std::endl;
+		std::cout << "|-	|-	|" << std::endl;
+		for (auto& el : sorted_times) {
+			std::cout << "|" << el.first << "\t|" << el.second << "\t|" << std::endl;
+		}
+		
+		
+	}
+	catch (std::exception& e) {
+		std::cerr << e.what() << std::endl;
 	}
 
 	return 0;

@@ -1,7 +1,7 @@
 mkdir build
 cd build
 
-for i in {0..10}
+for i in {0..9}
 do
 	mkdir build_$i
 	cd build_$i
@@ -10,6 +10,6 @@ do
 	cd ..
 done
 
-cmake -G Ninja ..
+cmake -G Ninja .. -DSKIP_EVALUATION=true
 cmake --build .
 ./CheckCompileTimes
