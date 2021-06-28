@@ -4,14 +4,23 @@ dist: focal
 compiler:
   - clang
 
+addons:
+  apt:
+    packages:
+      - clang-10
+      - libc++-10-dev
+      - libc++abi-10-dev
+  
+  
 before_install:
-  - sudo apt-get update
-  - sudo apt-get -y install libboost-all-dev
-  - sudo apt-get -y install ninja-build
+  - sudo apt update 
+  - sudo apt -y install libboost-all-dev
+  - sudo apt -y install ninja-build
+  - eval "CC=clang-10 && CXX=clang-10"
 
 script:
   - mkdir build
   - cd build
   - cmake -G Ninja ..
   - cmake --build .
-
+  - ./CheckCompileTimes
