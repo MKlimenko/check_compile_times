@@ -13,7 +13,7 @@ addons:
 before_install:
 - eval "CC=clang-10 && CXX=clang-10"
 - pip install conan
-- conan install boost/1.76.0@ --build=never -if build/boost -s build_type=Release -g CMakeDeps
+- conan install boost/1.76.0@ --build=never -if build/boost -s build_type=Debug -g CMakeDeps
 script:
 - cd build
 - |
@@ -21,11 +21,11 @@ script:
     do
         mkdir build_$i;
         cd build_$i;
-        cmake -G Ninja ../..  -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$PWD/../boost;
+        cmake -G Ninja ../..  -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=$PWD/../boost;
         cmake --build .;
         cd ..;
     done
-- cmake -G Ninja .. -DSKIP_EVALUATION=true -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$PWD/boost
+- cmake -G Ninja .. -DSKIP_EVALUATION=true -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=$PWD/boost
 - cmake --build .
 - git clone https://github.com/MKlimenko/check_compile_times.wiki.git
 - "./CheckCompileTimes"
