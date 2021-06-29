@@ -55,34 +55,39 @@ int main(int argc, char** argv) {
 		}
 		
 		auto markdown_table = std::ofstream("check_compile_times.wiki/Home.md");
+		std::ostream* table_ptr = &std::cout;
+		if (markdown_table.is_open()) {
+			table_ptr = &markdown_table;
+		}
 		
-		markdown_table << "# Boost headers signal compilation impact" << std::endl;
+		*table_ptr << "# Boost headers signal compilation impact" << std::endl;
 
-		markdown_table << "| Header 	| Time, ms 	|" << std::endl;
-		markdown_table << "|-	|-	|" << std::endl;
+		*table_ptr << "| Header 	| Time, ms 	| Relative slowdown 	|" << std::endl;
+		*table_ptr << "|-	|-	|-	|" << std::endl;
 		
 		std::vector<std::pair<std::string, double>> sorted_times;
+		double baseline = -1;
 		for (auto& el : header_time_map) {
 			auto time = std::accumulate(el.second.begin(), el.second.end(), 0.0);
 			time /= el.second.size();
+			if (baseline == -1)
+				baseline = time;
 			sorted_times.emplace_back(el.first, time);
-			markdown_table << "|" << el.first << "\t|" << time << "\t|" << std::endl;
+			*table_ptr << "|" << el.first << "\t|" << time << "\t|" << time / baseline << "\t|" << std::endl;
 		}
 		
-		markdown_table << std::endl << std::endl << std::endl;
+		*table_ptr << std::endl << std::endl << std::endl;
 		std::partial_sort(sorted_times.begin(), sorted_times.begin() + 5, sorted_times.end(), [](auto&lhs, auto&rhs) {
 			return lhs.second > rhs.second;
 		});
 		sorted_times.resize(5);
 		
-		markdown_table << "# Top-5 boost headers signal compilation impact" << std::endl;
-		markdown_table << "| Header 	| Time, ms 	|" << std::endl;
-		markdown_table << "|-	|-	|" << std::endl;
+		*table_ptr << "# Top-5 boost headers signal compilation impact" << std::endl;
+		*table_ptr << "| Header 	| Time, ms 	| Relative slowdown 	|" << std::endl;
+		*table_ptr << "|-	|-	|-	|" << std::endl;
 		for (auto& el : sorted_times) {
-			markdown_table << "|" << el.first << "\t|" << el.second << "\t|" << std::endl;
+			*table_ptr << "|" << el.first << "\t|" << el.second << "\t|" << el.second / baseline << "\t|" << std::endl;
 		}
-		
-		
 	}
 	catch (std::exception& e) {
 		std::cerr << e.what() << std::endl;

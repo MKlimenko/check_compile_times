@@ -143,6 +143,14 @@ if (NOT SKIP_EVALUATION)
 		target_compile_options(${executable_name} PUBLIC -ftime-trace)
 		target_link_libraries(${executable_name} pthread stdc++ stdc++fs)
 	endforeach()
+
+	set(filename "${CMAKE_CURRENT_LIST_DIR}/baseline-hpp_main.cpp")
+	file(WRITE ${filename} "int main() { return 0; }\n")
+		
+	set(executable_name "CheckBaseline")
+	add_executable(${executable_name} ${filename})
+	target_compile_options(${executable_name} PUBLIC -ftime-trace)
+	target_link_libraries(${executable_name} pthread stdc++ stdc++fs)
 endif()
 
 add_executable(CheckCompileTimes main.cpp)
