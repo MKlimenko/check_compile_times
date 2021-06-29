@@ -9,23 +9,23 @@ addons:
     - clang-10
     - libc++-10-dev
     - libc++abi-10-dev
-    - libboost-all-dev
     - ninja-build
 before_install:
 - eval "CC=clang-10 && CXX=clang-10"
+- pip install conan
+- conan install boost/1.76.0@ --build=never -if build/boost -s build_type=Release -g CMakeDeps
 script:
-- mkdir build
 - cd build
 - |
-    for i in {0..14}
+    for i in {0..9}
     do
         mkdir build_$i;
         cd build_$i;
-        cmake -G Ninja ../..;
+        cmake -G Ninja ../..  -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$PWD/../boost;
         cmake --build .;
         cd ..;
     done
-- cmake -G Ninja .. -DSKIP_EVALUATION=true
+- cmake -G Ninja .. -DSKIP_EVALUATION=true -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$PWD/boost
 - cmake --build .
 - git clone https://github.com/MKlimenko/check_compile_times.wiki.git
 - "./CheckCompileTimes"

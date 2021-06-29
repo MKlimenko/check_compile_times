@@ -3,10 +3,10 @@ project(CheckCompileTimes LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Boost)
+find_package(Boost 1.76.0 REQUIRED)
 
 if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-#	message( FATAL_ERROR "Only clang currently supports -ftime-trace" )
+	message( FATAL_ERROR "Only clang currently supports -ftime-trace" )
 endif()
 
 set(HEADERS_TO_PROCESS 
@@ -21,7 +21,7 @@ set(HEADERS_TO_PROCESS
 						boost/atomic.hpp
 						boost/beast.hpp
 						boost/bimap.hpp
-						boost/bind.hpp
+						boost/bind/bind.hpp
 						boost/call_traits.hpp
 						boost/callable_traits.hpp
 						boost/chrono.hpp
@@ -57,14 +57,15 @@ set(HEADERS_TO_PROCESS
 						boost/geometry.hpp
 						boost/gil.hpp
 						boost/graph/graph_traits.hpp
-                        boost/hana.hpp
-                        boost/heap/pairing_heap.hpp
-                        boost/histogram.hpp
-                        boost/hof.hpp
-                        boost/icl/interval.hpp
+						boost/hana.hpp
+						boost/heap/pairing_heap.hpp
+						boost/histogram.hpp
+						boost/hof.hpp
+						boost/icl/interval.hpp
 						boost/integer.hpp
 						boost/intrusive_ptr.hpp
 						boost/iterator.hpp
+						boost/json.hpp
 						boost/lambda/lambda.hpp
 						boost/lexical_cast.hpp
 						boost/local_function.hpp
@@ -80,6 +81,7 @@ set(HEADERS_TO_PROCESS
 						boost/optional.hpp
 						boost/outcome.hpp
 						boost/parameter.hpp
+						boost/pfr.hpp
 						boost/phoenix.hpp
 						boost/poly_collection/any_collection.hpp
 						boost/polygon/polygon.hpp
@@ -88,8 +90,8 @@ set(HEADERS_TO_PROCESS
 						boost/process.hpp
 						boost/program_options.hpp
 						boost/property_map/property_map.hpp
-                        boost/property_tree/ptree.hpp
-                        boost/proto/proto.hpp
+						boost/property_tree/ptree.hpp
+						boost/proto/proto.hpp
 						boost/qvm/all.hpp
 						boost/random.hpp
 						boost/range.hpp
@@ -111,7 +113,7 @@ set(HEADERS_TO_PROCESS
 						boost/system/config.hpp
 						boost/thread.hpp
 						boost/throw_exception.hpp
-						boost/timer.hpp
+						boost/timer/timer.hpp
 						boost/tokenizer.hpp
 						boost/tti/tti.hpp
 						boost/tuple/tuple.hpp
@@ -141,7 +143,8 @@ if (NOT SKIP_EVALUATION)
 		set(executable_name "Check${header_name}")
 		add_executable(${executable_name} ${filename})
 		target_compile_options(${executable_name} PUBLIC -ftime-trace)
-		target_link_libraries(${executable_name} pthread stdc++ stdc++fs)
+		target_link_libraries(${executable_name} pthread stdc++ stdc++fs ${CONAN_LIBS})
+		target_include_directories(${executable_name} PUBLIC ${Boost_INCLUDE_DIRS})
 	endforeach()
 
 	set(filename "${CMAKE_CURRENT_LIST_DIR}/baseline-hpp_main.cpp")
