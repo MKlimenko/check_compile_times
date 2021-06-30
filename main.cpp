@@ -39,7 +39,7 @@ namespace {
 			return lhs.second > rhs.second;
 		});
 		
-		table << "# Top-5 " << name << " headers signal compilation impact" << std::endl;
+		table << "# Top-5 " << name << " headers compilation impact" << std::endl;
 		table << "| Header 	| Time, ms 	| Relative slowdown 	|" << std::endl;
 		table << "|-	|-	|-	|" << std::endl;
 		for (std::size_t i = 0; i < std::min(static_cast<int>(vector.size()), 5); ++i)
@@ -54,7 +54,7 @@ namespace {
 			return lhs.first < rhs.first;
 		});
 		
-		table << "# " << name << " headers signal compilation impact" << std::endl;
+		table << "# " << name << " headers compilation impact" << std::endl;
 
 		table << "| Header 	| Time, ms 	| Relative slowdown 	|" << std::endl;
 		table << "|-	|-	|-	|" << std::endl;
