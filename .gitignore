@@ -32,3 +32,5 @@ _ReSharper*/
 packages/
 /build/*
 /boost-*-hpp_main.cpp
+
+*_main.cpp

@@ -9,6 +9,7 @@ addons:
     - clang-10
     - libc++-10-dev
     - libc++abi-10-dev
+    - libtbb-dev
     - ninja-build
 before_install:
 - eval "CC=clang-10 && CXX=clang-10"

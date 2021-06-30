@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -12,9 +13,14 @@ namespace {
 	
 	void GetElapsedTime(const std::filesystem::path& json_file) {
 		auto filename = std::filesystem::path(json_file).filename().string();
-		filename.resize(filename.find("-hpp_main.cpp.json"));
-		std::replace(filename.begin(), filename.end(), '-', '/');
-		filename += ".hpp";
+		auto boost_ending = filename.find("-hpp_main.cpp.json");
+		if (boost_ending == std::string::npos)
+			filename.resize(filename.find("_main.cpp.json"));
+		else  {
+			filename.resize(boost_ending);		
+			std::replace(filename.begin(), filename.end(), '-', '/');
+			filename += ".hpp";
+		}
 
 		std::ifstream json_stream(json_file);
 		auto str = std::string((std::istreambuf_iterator<char>(json_stream)), std::istreambuf_iterator<char>());
@@ -26,7 +32,41 @@ namespace {
 
 		header_time_map[filename].push_back(elapsed);
 	}
+	
+	template <typename T>
+	void PrintTop5(const std::string& name, T& vector, double baseline, std::ostream& table) {
+		std::partial_sort(vector.begin(), vector.begin() + std::min(static_cast<int>(vector.size()), 5), vector.end(), [](auto&lhs, auto&rhs) {
+			return lhs.second > rhs.second;
+		});
+		
+		table << "# Top-5 " << name << " headers signal compilation impact" << std::endl;
+		table << "| Header 	| Time, ms 	| Relative slowdown 	|" << std::endl;
+		table << "|-	|-	|-	|" << std::endl;
+		for (std::size_t i = 0; i < std::min(static_cast<int>(vector.size()), 5); ++i)
+			table << "|" << vector[i].first << "\t|" << vector[i].second << "\t|" << vector[i].second / baseline << "\t|" << std::endl;
+			
+		table << std::endl << std::endl << std::endl;
+	}
+	
+	template <typename T>
+	void PrintTable(const std::string& name, T& vector, double baseline, std::ostream& table) {
+		std::sort(vector.begin(), vector.end(), [](auto&lhs, auto&rhs) {
+			return lhs.first < rhs.first;
+		});
+		
+		table << "# " << name << " headers signal compilation impact" << std::endl;
+
+		table << "| Header 	| Time, ms 	| Relative slowdown 	|" << std::endl;
+		table << "|-	|-	|-	|" << std::endl;
+		
+
+		for (auto& el : vector) 
+			table << "|" << el.first << "\t|" << el.second << "\t|" << el.second / baseline << "\t|" << std::endl;
+		
+		table << std::endl << std::endl << std::endl;
+	}
 }
+
 
 int main(int argc, char** argv) {
 	try {		
@@ -56,38 +96,28 @@ int main(int argc, char** argv) {
 		
 		auto markdown_table = std::ofstream("check_compile_times.wiki/Home.md");
 		std::ostream* table_ptr = &std::cout;
-		if (markdown_table.is_open()) {
+		if (markdown_table.is_open()) 
 			table_ptr = &markdown_table;
-		}
 		
-		*table_ptr << "# Boost headers signal compilation impact" << std::endl;
-
-		*table_ptr << "| Header 	| Time, ms 	| Relative slowdown 	|" << std::endl;
-		*table_ptr << "|-	|-	|-	|" << std::endl;
-		
-		std::vector<std::pair<std::string, double>> sorted_times;
+		std::vector<std::pair<std::string, double>> sorted_times_stl;
+		std::vector<std::pair<std::string, double>> sorted_times_boost;
 		double baseline = -1;
 		for (auto& el : header_time_map) {
 			auto time = std::accumulate(el.second.begin(), el.second.end(), 0.0);
 			time /= el.second.size();
-			if (baseline == -1)
+			if (el.first.find("baseline") != std::string::npos)
 				baseline = time;
-			sorted_times.emplace_back(el.first, time);
-			*table_ptr << "|" << el.first << "\t|" << time << "\t|" << time / baseline << "\t|" << std::endl;
+			
+			if (el.first.find("boost") != std::string::npos)
+				sorted_times_boost.emplace_back(el.first, time);
+			else
+				sorted_times_stl.emplace_back(el.first, time);	
 		}
 		
-		*table_ptr << std::endl << std::endl << std::endl;
-		std::partial_sort(sorted_times.begin(), sorted_times.begin() + 5, sorted_times.end(), [](auto&lhs, auto&rhs) {
-			return lhs.second > rhs.second;
-		});
-		sorted_times.resize(5);
-		
-		*table_ptr << "# Top-5 boost headers signal compilation impact" << std::endl;
-		*table_ptr << "| Header 	| Time, ms 	| Relative slowdown 	|" << std::endl;
-		*table_ptr << "|-	|-	|-	|" << std::endl;
-		for (auto& el : sorted_times) {
-			*table_ptr << "|" << el.first << "\t|" << el.second << "\t|" << el.second / baseline << "\t|" << std::endl;
-		}
+		PrintTop5("STL", sorted_times_stl, baseline, *table_ptr);
+		PrintTop5("Boost", sorted_times_boost, baseline, *table_ptr);
+		PrintTable("STL", sorted_times_stl, baseline, *table_ptr);
+		PrintTable("Boost", sorted_times_boost, baseline, *table_ptr);
 	}
 	catch (std::exception& e) {
 		std::cerr << e.what() << std::endl;

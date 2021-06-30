@@ -10,6 +10,89 @@ if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 set(HEADERS_TO_PROCESS 
+						algorithm
+						any
+						array
+						atomic
+						bitset
+						cassert
+						cctype
+						cerrno
+						cfenv
+						cfloat
+						charconv
+						chrono
+						cinttypes
+						climits
+						clocale
+						cmath
+						codecvt
+						complex
+						condition_variable
+						csetjmp
+						csignal
+						cstdarg
+						cstddef
+						cstdint
+						cstdio
+						cstdlib
+						cstring
+						ctime
+						cuchar
+						cwchar
+						cwctype
+						deque
+						exception
+						execution
+						filesystem
+						forward_list
+						fstream
+						functional
+						future
+						initializer_list
+						iomanip
+						ios
+						iosfwd
+						iostream
+						istream
+						iterator
+						limits
+						list
+						locale
+						map
+						memory
+						memory_resource
+						mutex
+						new
+						numeric
+						optional
+						ostream
+						queue
+						random
+						ratio
+						regex
+						scoped_allocator
+						set
+						shared_mutex
+						sstream
+						stack
+						stdexcept
+						streambuf
+						string
+						string_view
+						strstream
+						system_error
+						thread
+						tuple
+						type_traits
+						typeindex
+						typeinfo
+						unordered_map
+						unordered_set
+						utility
+						valarray
+						variant
+						vector
 						boost/accumulators/accumulators.hpp
 						boost/algorithm/algorithm.hpp
 						boost/align.hpp
@@ -138,22 +221,19 @@ if (NOT SKIP_EVALUATION)
 		string(REPLACE "." "-" filename_preliminary ${header})
 		string(REPLACE "/" "-" header_name ${filename_preliminary})
 		set(filename "${CMAKE_CURRENT_LIST_DIR}/${header_name}_main.cpp")
-		file(WRITE ${filename} "#include <${header}>\n  int main() { return 0; }\n")
-			
-		set(executable_name "Check${header_name}")
-		add_executable(${executable_name} ${filename})
-		target_compile_options(${executable_name} PUBLIC -ftime-trace)
-		target_link_libraries(${executable_name} pthread stdc++ stdc++fs ${CONAN_LIBS})
-		target_include_directories(${executable_name} PUBLIC ${Boost_INCLUDE_DIRS})
+		list(APPEND sources ${filename})
+		file(WRITE ${filename} "#include <${header}>\n ")
 	endforeach()
-
+	
 	set(filename "${CMAKE_CURRENT_LIST_DIR}/baseline-hpp_main.cpp")
+	list(APPEND sources ${filename})
 	file(WRITE ${filename} "int main() { return 0; }\n")
-		
-	set(executable_name "CheckBaseline")
-	add_executable(${executable_name} ${filename})
+	
+	set(executable_name "CheckHeaders")
+	add_executable(${executable_name} ${sources})
 	target_compile_options(${executable_name} PUBLIC -ftime-trace)
-	target_link_libraries(${executable_name} pthread stdc++ stdc++fs)
+	target_link_libraries(${executable_name} pthread stdc++ stdc++fs tbb ${CONAN_LIBS})
+	target_include_directories(${executable_name} PUBLIC ${Boost_INCLUDE_DIRS})
 endif()
 
 add_executable(CheckCompileTimes main.cpp)
