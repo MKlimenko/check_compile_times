@@ -188,7 +188,9 @@ set(HEADERS_TO_PROCESS
 						boost/signals2.hpp
 						boost/smart_ptr.hpp
 						boost/sort/sort.hpp
+						boost/spirit/home/x3.hpp
 						boost/spirit/include/classic.hpp
+						boost/spirit/include/qi.hpp
 						boost/stacktrace.hpp
 						boost/statechart/state.hpp
 						boost/static_assert.hpp
